@@ -11,15 +11,16 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
     private SensorManager sm;
     private Sensor sensor;
     private StepDetectionListener mStepDetectionListener;
-    private DeviceAttitudeHandler dah;
     private int step = 0;
     private float[] filteredValues = {0.0f, 0.0f}; // x, y 축의 지수 이동 평균 필터링된 값
     private static final float ALPHA = 0.2f; // 지수 이동 평균 필터의 가중치
-    private static final float THRESHOLD_LOWERX = 0.05f; // 초기 임계값의 하한
-    private static final float THRESHOLD_LOWERY = 0.5f; // 초기 임계값의 하한
     private static final float THRESHOLD_UPPER = 1.0f; // 초기 임계값의 상한
-    private float initialThresholdX = 0.15f; // 초기 임계값
-    private float initialThresholdY = 1.0f; // 초기 임계값
+    private static final float THRESHOLD_LOWERX = 0.05f; // 초기 임계값의 하한
+    private static final float THRESHOLD_LOWERY = 0.05f; // 초기 임계값의 하한
+    private static final float THRESHOLD_LOWERX_ROTATED = 0.03f; // 회전 중 임계값의 하한
+    private static final float THRESHOLD_LOWERY_ROTATED = 0.1f; // 회전 중 임계값의 하한
+    private float initialThresholdX = 0.08f; // 초기 임계값
+    private float initialThresholdY = 0.2f; // 초기 임계값
     public float distanceStep = 0.75f;
 
     public void setDistanceStep(float stepSize){
@@ -30,7 +31,6 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
         super();
         this.sm = sm;
         sensor = sm.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        dah = new DeviceAttitudeHandler(sm);
     }
 
     public void start() {
@@ -91,22 +91,28 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
 
     // 임계값 동적 조절 메서드
     private void adjustThreshold() {
-        // 걸음 수가 일정 범위 내에서 변화하는지 확인하고 임계값 동적으로 조절
-        // 예를 들어, 현재는 임의의 조건을 기반으로 임계값을 동적으로 조절하는 예시를 보여줍니다.
-        if (step >= 100 && step <= 200) {
-            // 걸음 수가 100에서 200 사이인 경우, 임계값을 높입니다.
-            initialThresholdX = Math.min(initialThresholdX + 0.1f, THRESHOLD_UPPER);
-            initialThresholdY= Math.min(initialThresholdY + 0.1f, THRESHOLD_UPPER);
-            distanceStep = Math.min(distanceStep + 0.1f, THRESHOLD_UPPER); // 보폭 길이도 조절
-        } else if (step > 200) {
-            // 걸음 수가 200보다 큰 경우, 임계값을 더 높입니다.
-            initialThresholdX = Math.min(initialThresholdX + 0.2f, THRESHOLD_UPPER);
-            initialThresholdY = Math.min(initialThresholdY + 0.2f, THRESHOLD_UPPER);
-            distanceStep = Math.min(distanceStep + 0.2f, THRESHOLD_UPPER); // 보폭 길이도 조절
+        if (PdrActivity.dah.isRotationDetected()) {
+            // 회전 중임을 감지한 경우, 회전 중 임계값으로 설정
+            initialThresholdX = THRESHOLD_LOWERX_ROTATED;
+            initialThresholdY = THRESHOLD_LOWERY_ROTATED;
         } else {
-            // 그 외의 경우, 임계값을 초기 값으로 복원합니다.
-            initialThresholdX = THRESHOLD_LOWERX;
-            initialThresholdY = THRESHOLD_LOWERY;
+            // 걸음 수가 일정 범위 내에서 변화하는지 확인하고 임계값 동적으로 조절
+            // 예를 들어, 현재는 임의의 조건을 기반으로 임계값을 동적으로 조절하는 예시를 보여줍니다.
+            if (step >= 100 && step <= 200) {
+                // 걸음 수가 100에서 200 사이인 경우, 임계값을 높입니다.
+                initialThresholdX = Math.min(initialThresholdX + 0.1f, THRESHOLD_UPPER);
+                initialThresholdY = Math.min(initialThresholdY + 0.1f, THRESHOLD_UPPER);
+                distanceStep = Math.min(distanceStep + 0.1f, THRESHOLD_UPPER); // 보폭 길이도 조절
+            } else if (step > 200) {
+                // 걸음 수가 200보다 큰 경우, 임계값을 더 높입니다.
+                initialThresholdX = Math.min(initialThresholdX + 0.2f, THRESHOLD_UPPER);
+                initialThresholdY = Math.min(initialThresholdY + 0.2f, THRESHOLD_UPPER);
+                distanceStep = Math.min(distanceStep + 0.2f, THRESHOLD_UPPER); // 보폭 길이도 조절
+            } else {
+                // 그 외의 경우, 임계값을 초기 값으로 복원합니다.
+                initialThresholdX = THRESHOLD_LOWERX;
+                initialThresholdY = THRESHOLD_LOWERY;
+            }
         }
     }
 

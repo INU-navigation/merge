@@ -67,6 +67,7 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation(files("libs/commons-math3-3.6.1.jar"));
     implementation("org.ejml:ejml-simple:0.41")
+    implementation ("org.apache.commons:commons-csv:1.8")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.9.0")

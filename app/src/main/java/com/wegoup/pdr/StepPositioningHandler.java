@@ -23,9 +23,7 @@ public class StepPositioningHandler {
         Log.d("RotationAngle", "CurrentRotationAngle = " + currentRotationAngle + "previousRotationAngle = " + previousRotationAngle);
         Log.d("RotationAngle", "direction+= = " + Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))));
 
-        if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 3.0) {
-            direction += (float) Math.toDegrees(currentRotationAngle);
-        }
+        direction += (float) Math.toDegrees(currentRotationAngle);
 
         PdrActivity.sdh.setDistanceStep(0.75f);
         double angularDistance = stepSize / EARTH_RADIUS;

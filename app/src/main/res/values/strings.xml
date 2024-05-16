@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">indoorMap</string>
+    <string name="app_name">INUindoorNavi</string>
     <string name="select_level">층 선택</string>
+    <string name="room_start" />
+    <string name="room_destination" />
     <string-array name="level_array">
         <item>F1</item>
         <item>F2</item>
@@ -11,10 +13,10 @@
     </string-array>
     <string-array name="room_start">
         <item>출발지 선택</item>
-        <item>994A-A동정문</item>
-        <item>994D-B동정문</item>
-        <item>994B-A동후문</item>
-        <item>994C-B동후문</item>
+        <item>194A-A동정문</item>
+        <item>194D-B동정문</item>
+        <item>194B-A동후문</item>
+        <item>194C-B동후문</item>
         <item>101-디지털실험실</item>
         <item>102-기초정보공학실험실</item>
         <item>103-단과대학생회실</item>
@@ -27,8 +29,8 @@
         <item>111-컴퓨터실험실-1</item>
         <item>112-여학생휴게실</item>
         <item>113~116-탈의실 및 샤워실</item>
-        <item>U101-화장실(남)</item>
-        <item>U102-화장실(여)</item>
+        <item>101U-화장실(남)</item>
+        <item>102U-화장실(여)</item>
         <item>201-지능형 신호 및 정보 시스템 연구실</item>
         <item>202-분산네트워크연구실</item>
         <item>203-무선정보연구실</item>
@@ -56,8 +58,8 @@
         <item>227-교수연구실(임베디드시스템-전광길)</item>
         <item>228-이동통신시스템</item>
         <item>229-영상연구실</item>
-        <item>U201-화장실(남)</item>
-        <item>U202-화장실(여)</item>
+        <item>201U-화장실(남)</item>
+        <item>202U-화장실(여)</item>
         <item>301-지능로봇시스템실험실</item>
         <item>302-캡스톤디자인실험실</item>
         <item>303-학과학생회실-2(임베디드시스템)</item>
@@ -86,8 +88,8 @@
         <item>328-교수연구실(임베디드시스템-강석훈)</item>
         <item>329-임베디드시스템구조실험실</item>
         <item>330-무선통신실험실</item>
-        <item>U301-화장실(남)</item>
-        <item>U302-화장실(여)</item>
+        <item>301U-화장실(남)</item>
+        <item>302U-화장실(여)</item>
         <item>401-모바일컴퓨팅연구실</item>
         <item>402-무선정보네트워크연구실</item>
         <item>403-세미나실</item>
@@ -122,8 +124,8 @@
         <item>434-교수연구실(컴퓨터공학부-최승식)</item>
         <item>435-데이터지능연구실</item>
         <item>436-뉴로모픽 컴퓨팅 시스템 연구실</item>
-        <item>U401-화장실(남)</item>
-        <item>U402-화장실(여)</item>
+        <item>401U-화장실(남)</item>
+        <item>402U-화장실(여)</item>
         <item>501-컴퓨터실습실-3</item>
         <item>502-HW실습실</item>
         <item>503(A,B)-연구용실험실</item>
@@ -154,15 +156,15 @@
         <item>526-교수연구실(컴퓨터공학부-김우일)</item>
         <item>527-교수연구실(컴퓨터공학부-박문주)</item>
         <item>528-시스템소프트웨어연구실</item>
-        <item>U501-화장실(남)</item>
-        <item>U502-화장실(여)</item>
+        <item>501U-화장실(남)</item>
+        <item>502U-화장실(여)</item>
     </string-array>
     <string-array name="room_destination">
         <item>도착지 선택</item>
-        <item>994A-A동정문</item>
-        <item>994D-B동정문</item>
-        <item>994B-A동후문</item>
-        <item>994C-B동후문</item>
+        <item>194A-A동정문</item>
+        <item>194D-B동정문</item>
+        <item>194B-A동후문</item>
+        <item>194C-B동후문</item>
         <item>101-디지털실험실</item>
         <item>102-기초정보공학실험실</item>
         <item>103-단과대학생회실</item>
@@ -175,8 +177,8 @@
         <item>111-컴퓨터실험실-1</item>
         <item>112-여학생휴게실</item>
         <item>113~116-탈의실 및 샤워실</item>
-        <item>U101-화장실(남)</item>
-        <item>U102-화장실(여)</item>
+        <item>101U-화장실(남)</item>
+        <item>102U-화장실(여)</item>
         <item>201-지능형 신호 및 정보 시스템 연구실</item>
         <item>202-분산네트워크연구실</item>
         <item>203-무선정보연구실</item>
@@ -204,8 +206,8 @@
         <item>227-교수연구실(임베디드시스템-전광길)</item>
         <item>228-이동통신시스템</item>
         <item>229-영상연구실</item>
-        <item>U201-화장실(남)</item>
-        <item>U202-화장실(여)</item>
+        <item>201U-화장실(남)</item>
+        <item>202U-화장실(여)</item>
         <item>301-지능로봇시스템실험실</item>
         <item>302-캡스톤디자인실험실</item>
         <item>303-학과학생회실-2(임베디드시스템)</item>
@@ -234,8 +236,8 @@
         <item>328-교수연구실(임베디드시스템-강석훈)</item>
         <item>329-임베디드시스템구조실험실</item>
         <item>330-무선통신실험실</item>
-        <item>U301-화장실(남)</item>
-        <item>U302-화장실(여)</item>
+        <item>301U-화장실(남)</item>
+        <item>302U-화장실(여)</item>
         <item>401-모바일컴퓨팅연구실</item>
         <item>402-무선정보네트워크연구실</item>
         <item>403-세미나실</item>
@@ -270,8 +272,8 @@
         <item>434-교수연구실(컴퓨터공학부-최승식)</item>
         <item>435-데이터지능연구실</item>
         <item>436-뉴로모픽 컴퓨팅 시스템 연구실</item>
-        <item>U401-화장실(남)</item>
-        <item>U402-화장실(여)</item>
+        <item>401U-화장실(남)</item>
+        <item>402U-화장실(여)</item>
         <item>501-컴퓨터실습실-3</item>
         <item>502-HW실습실</item>
         <item>503(A,B)-연구용실험실</item>
@@ -302,8 +304,7 @@
         <item>526-교수연구실(컴퓨터공학부-김우일)</item>
         <item>527-교수연구실(컴퓨터공학부-박문주)</item>
         <item>528-시스템소프트웨어연구실</item>
-        <item>U501-화장실(남)</item>
-        <item>U502-화장실(여)</item>
+        <item>501U-화장실(남)</item>
+        <item>502U-화장실(여)</item>
     </string-array>
-    <string name="title_activity_pdr">PdrActivity</string>
 </resources>

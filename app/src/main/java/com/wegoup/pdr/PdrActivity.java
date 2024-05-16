@@ -1,8 +1,10 @@
 package com.wegoup.pdr;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -41,14 +43,21 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.maps.android.data.kml.KmlLayer;
+import com.wegoup.dijkstra.CSVReader;
+import com.wegoup.dijkstra.DijkstraAlgorithm;
+import com.wegoup.dijkstra.UndirectedGraph;
 import com.wegoup.incheon_univ_map.IsInsidePlace;
 import com.wegoup.incheon_univ_map.R;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerDragListener {
@@ -61,7 +70,9 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
     private Spinner spinnerDestinationLocation;
     private ImageButton bt_search;
     private ImageButton bt_searchOff;
-    private Marker marker;
+    public String selectedStartLocation;
+    public String selectedDestinationLocation;
+    private Marker PDRmarker;
     LatLng markerPosition;  // 사용자 선택 마커 위치
     private LatLng newLatLng;   // computeNextStep(다음 위치 계산)
     private LatLng lastKnownLatLng = null;
@@ -71,6 +82,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
     public static DeviceAttitudeHandler dah;
     TextView totalDist;
     private boolean isFirstStep = true;
+    private boolean message = true;
     private Location markerLocation;
     private Polyline userPath; // 실시간 움직임을 표시할 Polyline
     private Polyline floorPath; // 실시간 움직임을 표시할 Polyline
@@ -109,42 +121,12 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
 
         setupSpinner();
 
-        spinnerStartLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // 선택된 항목을 가져와서 변수에 저장
-                //selectedStartLocation = parent.getItemAtPosition(position).toString();
-                // 저장된 값을 로그로 출력
-                //Log.d(TAG, "Selected start location: " + selectedStartLocation);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // 스피너에서 아무 항목도 선택되지 않았을 때의 동작을 정의합니다.
-            }
-        });
-
-        spinnerDestinationLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // 선택된 항목을 가져와서 변수에 저장
-                //selectedDestinationLocation = parent.getItemAtPosition(position).toString();
-                // 저장된 값을 로그로 출력
-                // Log.d(TAG, "Selected destination: " + selectedDestinationLocation);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // 스피너에서 아무 항목도 선택되지 않았을 때의 동작을 정의합니다.
-            }
-        });
-
         // 버튼 설정
         ImageButton editButton = findViewById(R.id.edit_button);
         editButton.setOnClickListener(v -> {
             if (googleMap != null) {
-                if (marker != null && userPath != null) {
-                    marker.remove();
+                if (PDRmarker != null && userPath != null) {
+                    PDRmarker.remove();
                     userPath.remove(); userPath = null;
                     stopPDR();
                 }
@@ -154,9 +136,8 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                 addInitialMarkerAtCurLocation();
                 Log.d("marker", "marker가 있습니다.");
             }
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker());
                 Toast.makeText(PdrActivity.this, "마커를 꾹 눌러 움직여주세요", Toast.LENGTH_LONG).show();
-                marker.setDraggable(true);
+                PDRmarker.setDraggable(true);
             }
         });
 
@@ -167,12 +148,12 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                 userPath.remove();
                 userPath = null;
             }
-            if (marker != null) {
+            if (PDRmarker != null) {
                 changeMarkerIcon();
-                marker.setDraggable(false);
+                PDRmarker.setDraggable(false);
                 googleMap.setOnMarkerDragListener(null);
 
-                markerPosition = marker.getPosition();
+                markerPosition = PDRmarker.getPosition();
                 double latitude = markerPosition.latitude;
                 double longitude = markerPosition.longitude;
                 Log.d("loc", "lat : " + latitude + ", lon : " + longitude);
@@ -221,10 +202,10 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                 floorPaths.clear();
                 floorPaths = null;
             }
-            if (marker != null) {
-                marker.remove();
+            if (PDRmarker != null) {
+                PDRmarker.remove();
             }
-            Toast.makeText(PdrActivity.this, "수정 버튼을 누르면 마커가 다시 생성됩니다!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(PdrActivity.this, "수정 버튼을 누르면 PDR 마커가 다시 생성됩니다!", Toast.LENGTH_SHORT).show();
         });
 
     }
@@ -261,6 +242,12 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                     // Show features for the selected level
                     int selectedLevel = spinner.getSelectedItemPosition();
                     showFeaturesForLevel(selectedLevel);
+                    if (message) {
+                        Toast.makeText(PdrActivity.this, "출발지, 도착지는 파란색 마커로 나타납니다", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PdrActivity.this, "실시간 위치 추정은 초록색 마커를 출발 위치로 움직여주세요", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PdrActivity.this, "설정하기 버튼을 누르면 시작하고, 끝내기를 누르면 멈춥니다", Toast.LENGTH_SHORT).show();
+                        message = false;
+                    }
                 } else {
                     spinner.setVisibility(View.GONE); // Hide spinner when zoom level is too low
                     spinnerStartLocation.setVisibility(View.GONE);
@@ -268,6 +255,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                     bt_search.setVisibility(View.GONE);
                     bt_searchOff.setVisibility(View.GONE);
                     isMapZoomedEnough = false;
+                    message = true;
                     if (kmlLayer != null) {
                         kmlLayer.removeLayerFromMap();
                     }
@@ -295,13 +283,15 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void addMarker(double lat, double lon) {
+        BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
         LatLng defaultLocation = new LatLng(lat, lon);
         MarkerOptions markerOptions = new MarkerOptions()
+                .icon(icon)
                 .position(defaultLocation)
                 .title("현위치(출발지)");
-        marker = googleMap.addMarker(markerOptions);
+        PDRmarker = googleMap.addMarker(markerOptions);
         isMarkerDraggable = true; // Enable marker dragging
-        marker.setDraggable(isMarkerDraggable);
+        PDRmarker.setDraggable(isMarkerDraggable);
     }
 
     // 초기 위치를 가져와서 마커를 추가하는 메서드
@@ -324,8 +314,8 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
     private void changeMarkerIcon() {
         // Change marker icon
         BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.point);
-        if (marker != null) {
-            marker.setIcon(icon);
+        if (PDRmarker != null) {
+            PDRmarker.setIcon(icon);
         }
     }
 
@@ -354,8 +344,8 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
             kmlLayer.addLayerToMap();
 
             // 마커가 없는 경우에만 마커 추가
-            if (marker != null) {
-                marker.setVisible(true);
+            if (PDRmarker != null) {
+                PDRmarker.setVisible(true);
             } else {
                 addInitialMarkerAtCurLocation();
             }
@@ -370,6 +360,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(adapter.getPosition("X")); // Initially select "X"
+        BitmapDescriptor icon2 = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -381,10 +372,10 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                         currentLevel = position;
                         showFeaturesForLevel(currentLevel);
                     }
-                    // 사용자가 건물 내부에 있고 층 경로가 있는 경우 해당 층의 경로를 표시
+                    /*// 사용자가 건물 내부에 있고 층 경로가 있는 경우 해당 층의 경로를 표시
                     if (isInsidePlace.building7(markerPosition) && floorPaths != null) {
                         showFloorPath(currentLevel);
-                    }
+                    }*/
                 }
             }
 
@@ -392,13 +383,628 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
             public void onNothingSelected(AdapterView<?> parent) {
                 // Spinner에서 아무것도 선택되지 않은 경우 기본 동작 수행
                 googleMap.clear();
-                if (marker != null) {
-                    marker.setVisible(true);
+                if (PDRmarker != null) {
+                    PDRmarker.setVisible(true);
                 } else {
                     addInitialMarkerAtCurLocation();
                 }
             }
         });
+
+        AdapterView.OnItemSelectedListener startItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selected = parent.getItemAtPosition(position).toString();
+                selectedStartLocation = selected;
+                Log.d("OnItemSelected", "Selected start location: " + selectedStartLocation);
+                //MarkerFromCSV(MainActivity.this,selectedStartLocation);
+                List<List<String>> SaveMarkerLocation = new ArrayList<>();
+                List<Double> MarkerLocation = new ArrayList<>();
+                SaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedStartLocation);
+
+                for (List<String> innerList : SaveMarkerLocation) {
+                    for (String str : innerList) {
+                        // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                        String[] split = str.split(",");
+                        for (String s : split) {
+                            MarkerLocation.add(Double.parseDouble(s.trim()));
+                        }
+                    }
+                }
+
+                if (!SaveMarkerLocation.isEmpty())
+                {
+                    Double lat = MarkerLocation.get(1); Double lon = MarkerLocation.get(0);
+                    LatLng markerPosition = new LatLng(lat,lon);
+
+                    MarkerOptions StartMarkerOptions = new MarkerOptions();
+                    StartMarkerOptions.position(markerPosition);
+                    StartMarkerOptions.title(selectedStartLocation);
+                    StartMarkerOptions.icon(icon2);
+                    // DestinationMarkerOptions.position(markerPosition);
+                    Marker marker = googleMap.addMarker(StartMarkerOptions);
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // 선택된 것이 없을 때의 동작을 정의합니다.
+            }
+        };
+
+        // 출발지 스피너에 선택 이벤트 핸들러 설정
+        spinnerStartLocation.setOnItemSelectedListener(startItemSelectedListener);
+
+        // 도착지 스피너의 선택 이벤트 핸들러
+        AdapterView.OnItemSelectedListener destinationItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selected = parent.getItemAtPosition(position).toString();
+                selectedDestinationLocation = selected;
+                Log.d("OnItemSelected", "Selected destination location: " + selectedDestinationLocation);
+                List<List<String>> SaveMarkerLocation = new ArrayList<>();
+                List<Double> MarkerLocation = new ArrayList<>();
+                SaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedDestinationLocation);
+
+                for (List<String> innerList : SaveMarkerLocation) {
+                    for (String str : innerList) {
+                        // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                        String[] split = str.split(",");
+                        for (String s : split) {
+                            MarkerLocation.add(Double.parseDouble(s.trim()));
+                        }
+                    }
+                }
+
+                if(!SaveMarkerLocation.isEmpty())
+                {
+                    Double lat = MarkerLocation.get(1); Double lon = MarkerLocation.get(0);
+                    LatLng markerPosition = new LatLng(lat,lon);
+
+                    MarkerOptions DestinationMarkerOptions = new MarkerOptions();
+                    DestinationMarkerOptions.position(markerPosition);
+                    DestinationMarkerOptions.title(selectedDestinationLocation);
+                    DestinationMarkerOptions.icon(icon2);
+                    // DestinationMarkerOptions.position(markerPosition);
+                    Marker marker = googleMap.addMarker(DestinationMarkerOptions);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // 선택된 것이 없을 때의 동작을 정의합니다.
+            }
+        };
+
+        // 도착지 스피너에 선택 이벤트 핸들러 설정
+        spinnerDestinationLocation.setOnItemSelectedListener(destinationItemSelectedListener);
+
+        bt_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedStartLocation == null || selectedDestinationLocation == null) {
+                    Toast.makeText(PdrActivity.this, "Please select both start and destination locations", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                googleMap.clear();
+                Toast.makeText(PdrActivity.this, "수정 버튼을 누르면 PDR 마커가 다시 생성됩니다!", Toast.LENGTH_SHORT).show();
+
+                // 선택된 출발지의 층을 가져옵니다.
+                int selectedFloorStart = Integer.parseInt(selectedStartLocation.substring(0, 1));
+                int selectedFloorDestination = Integer.parseInt(selectedDestinationLocation.substring(0, 1));
+
+                // 선택된 층에 따라 지도를 보여줍니다.
+                showMapForFloor(selectedFloorStart);
+
+
+                UndirectedGraph graph = new UndirectedGraph();
+                readGraphDataFromCSV(PdrActivity.this, graph, "path12345-좌표최종2.csv");
+
+                //Log.d("Graph", graph.getGraphInfo());
+                // getVertexCount 메서드 호출하여 노드의 수 가져오기
+
+                DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph, PdrActivity.this);
+
+                //버튼
+
+                List<String> shortestPath = dijkstra.findShortestPath(selectedStartLocation, selectedDestinationLocation);
+                // 최단 경로 출력
+                Log.d("ShortestPath", "Shortest Path: " + shortestPath);
+
+                int splitIndex = -1;
+                List<String> firstHalf = new ArrayList<>();
+                List<String> secondHalf = new ArrayList<>();
+                List<Integer> splitIndices = new ArrayList<>(); // 모든 "계단입구"의 인덱스를 저장할 리스트
+
+                for (int i = 0; i < shortestPath.size(); i++) {
+                    if (shortestPath.get(i) instanceof String && ((String) shortestPath.get(i)).startsWith("계단입구")) {
+                        splitIndices.add(i); // "계단입구"의 인덱스를 리스트에 추가
+                    }
+                }
+                ;
+
+                if (selectedFloorStart != selectedFloorDestination) {
+
+
+                    // 첫 번째 "계단입구"를 기준으로 배열을 분리
+                    int startIndex = 0;
+                    int endIndex = splitIndices.get(0);
+                    firstHalf = shortestPath.subList(startIndex, endIndex + 1);
+
+                    // 두 번째 배열은 첫 번째 "계단입구" 다음부터 마지막 요소까지
+                    startIndex = endIndex + 1;
+                    endIndex = shortestPath.size() - 1;
+                    secondHalf = shortestPath.subList(startIndex, endIndex + 1);
+
+
+                    List<String> FirstEdgeName = dijkstra.GetEdgeName(firstHalf);
+                    List<String> SecondEdgeName = dijkstra.GetEdgeName(secondHalf);
+
+                    List<List<String>> FirstvaluesList = retrieveValuesFromCSV(PdrActivity.this, FirstEdgeName);
+                    List<List<String>> SecondvaluesList = retrieveValuesFromCSV(PdrActivity.this, SecondEdgeName);
+
+                    List<List<Double>> FirstconvertedValuesList = new ArrayList<>();
+                    List<List<Double>> SecondconvertedValuesList = new ArrayList<>();
+
+                    for (List<String> coordinates : FirstvaluesList) {
+                        List<Double> convertedCoordinates = new ArrayList<>();
+                        for (String coordinate : coordinates) {
+                            String[] coords = coordinate.split(","); // 좌표를 쉼표로 분리
+                            if (coords.length == 4) { // 좌표가 위도와 경도 쌍으로 구성된 경우
+                                double latitude1 = Double.parseDouble(coords[0]);
+                                double longitude1 = Double.parseDouble(coords[1]);
+                                double latitude2 = Double.parseDouble(coords[2]);
+                                double longitude2 = Double.parseDouble(coords[3]);
+
+                                // double 값으로 변환된 좌표를 리스트에 추가합니다.
+                                convertedCoordinates.add(latitude1);
+                                convertedCoordinates.add(longitude1);
+                                convertedCoordinates.add(latitude2);
+                                convertedCoordinates.add(longitude2);
+
+                            }
+                            FirstconvertedValuesList.add(convertedCoordinates);
+                        }
+
+                    }
+
+                    for (List<String> coordinates : SecondvaluesList) {
+                        List<Double> convertedCoordinates = new ArrayList<>();
+                        for (String coordinate : coordinates) {
+                            String[] coords = coordinate.split(","); // 좌표를 쉼표로 분리
+                            if (coords.length == 4) { // 좌표가 위도와 경도 쌍으로 구성된 경우
+                                double latitude1 = Double.parseDouble(coords[0]);
+                                double longitude1 = Double.parseDouble(coords[1]);
+                                double latitude2 = Double.parseDouble(coords[2]);
+                                double longitude2 = Double.parseDouble(coords[3]);
+
+                                // double 값으로 변환된 좌표를 리스트에 추가합니다.
+                                convertedCoordinates.add(latitude1);
+                                convertedCoordinates.add(longitude1);
+                                convertedCoordinates.add(latitude2);
+                                convertedCoordinates.add(longitude2);
+
+                            }
+                            SecondconvertedValuesList.add(convertedCoordinates);
+                        }
+
+                    }
+
+                    List<LatLng> Firstpoints = new ArrayList<>();
+                    for (List<Double> coordinates : FirstconvertedValuesList) {
+                        for (int i = 0; i < coordinates.size(); i += 2) { // 각 좌표쌍마다 2씩 증가
+                            double longitude = coordinates.get(i);
+                            double latitude = coordinates.get(i + 1);
+                            Firstpoints.add(new LatLng(latitude, longitude)); // 위도와 경도를 바꿔서 추가
+                        }
+                    }
+
+                    List<LatLng> Secondpoints = new ArrayList<>();
+                    for (List<Double> coordinates : SecondconvertedValuesList) {
+                        for (int i = 0; i < coordinates.size(); i += 2) { // 각 좌표쌍마다 2씩 증가
+                            double longitude = coordinates.get(i);
+                            double latitude = coordinates.get(i + 1);
+                            Secondpoints.add(new LatLng(latitude, longitude)); // 위도와 경도를 바꿔서 추가
+                        }
+                    }
+
+                    // 원래의 points 리스트를 복사하여 pointsCopy를 생성합니다.
+                    List<LatLng> FirstpointsCopy = new ArrayList<>(Firstpoints);
+                    List<LatLng> SecondpointsCopy = new ArrayList<>(Secondpoints);
+
+
+                    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                            // 사용자가 항목을 선택했을 때 실행되는 코드
+                            Marker previousMarker = null;
+                            PolylineOptions polylineOptionsSecond = new PolylineOptions();
+                            polylineOptionsSecond.width(10); polylineOptionsSecond .color(Color.BLUE);
+                            String selectedItem = (String) parentView.getItemAtPosition(position);
+                            selectedItem = selectedItem.substring(1, 2);
+
+
+                            //도착지 층
+                            if(selectedItem.equals(selectedDestinationLocation.substring(0, 1)))
+                            {
+                                if (previousMarker != null) {
+                                    previousMarker.remove();
+                                }
+                                googleMap.clear();
+                                for (int i = 0; i < SecondpointsCopy.size(); i += 2) {
+                                    // 현재 좌표와 다음 좌표를 가져와서 PolylineOptions에 추가합니다.
+                                    polylineOptionsSecond.add(SecondpointsCopy.get(i));
+                                    if (i + 1 < SecondpointsCopy.size()) {
+                                        polylineOptionsSecond.add(SecondpointsCopy.get(i + 1));
+                                    }
+                                    googleMap.addPolyline(polylineOptionsSecond); // 추가된 좌표를 포함한 Polyline을 지도에 표시합니다.
+                                    // 추가된 좌표를 제거하여 중복 사용을 방지합니다.
+                                    if (i + 1 < SecondpointsCopy.size()) {
+                                        polylineOptionsSecond.getPoints().remove(SecondpointsCopy.get(i + 1));
+                                    }
+                                    polylineOptionsSecond.getPoints().remove(SecondpointsCopy.get(i));
+                                }
+                                //도착지 마커
+                                List<List<String>> DestinationSaveMarkerLocation = new ArrayList<>();
+                                List<Double> DestinationMarkerLocation = new ArrayList<>();
+                                DestinationSaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedDestinationLocation);
+
+                                for (List<String> innerList : DestinationSaveMarkerLocation) {
+                                    for (String str : innerList) {
+                                        // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                                        String[] split = str.split(",");
+                                        for (String s : split) {
+                                            DestinationMarkerLocation.add(Double.parseDouble(s.trim()));
+                                        }
+                                    }
+                                }
+
+
+                                if(!DestinationMarkerLocation.isEmpty())
+                                {
+                                    Double lat = DestinationMarkerLocation.get(1); Double lon = DestinationMarkerLocation.get(0);
+                                    LatLng markerPosition = new LatLng(lat,lon);
+
+                                    MarkerOptions StartMarkerOptions = new MarkerOptions();
+                                    StartMarkerOptions.position(markerPosition);
+                                    StartMarkerOptions.title(selectedDestinationLocation);
+                                    StartMarkerOptions.icon(icon2);
+                                    // DestinationMarkerOptions.position(markerPosition);
+                                    Marker marker = googleMap.addMarker(StartMarkerOptions);
+                                    previousMarker = marker;
+
+
+                                }
+
+
+                            }//출발지 층
+                            else if(selectedItem.equals(selectedStartLocation.substring(0, 1)))
+                            {
+                                if (previousMarker != null) {
+                                    previousMarker.remove();
+                                }
+                                //출발지 마커
+                                List<List<String>> SaveMarkerLocation = new ArrayList<>();
+                                List<Double> MarkerLocation = new ArrayList<>();
+                                SaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedStartLocation);
+
+                                for (List<String> innerList : SaveMarkerLocation) {
+                                    for (String str : innerList) {
+                                        // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                                        String[] split = str.split(",");
+                                        for (String s : split) {
+                                            MarkerLocation.add(Double.parseDouble(s.trim()));
+                                        }
+                                    }
+                                }
+
+
+                                if(!SaveMarkerLocation.isEmpty())
+                                {
+                                    Double lat = MarkerLocation.get(1); Double lon = MarkerLocation.get(0);
+                                    LatLng markerPosition = new LatLng(lat,lon);
+
+                                    MarkerOptions StartMarkerOptions = new MarkerOptions();
+                                    StartMarkerOptions.position(markerPosition);
+                                    StartMarkerOptions.title(selectedStartLocation);
+                                    StartMarkerOptions.icon(icon2);
+                                    // DestinationMarkerOptions.position(markerPosition);
+                                    Marker marker = googleMap.addMarker(StartMarkerOptions);
+                                    previousMarker = marker;
+
+                                }
+
+                                googleMap.clear();
+                                PolylineOptions polylineOptions = new PolylineOptions();
+                                polylineOptions.width(10); polylineOptions .color(Color.BLUE);
+
+                                for (int i = 0; i < FirstpointsCopy.size(); i += 2) {
+                                    // 현재 좌표와 다음 좌표를 가져와서 PolylineOptions에 추가합니다.
+                                    polylineOptions.add(FirstpointsCopy.get(i));
+                                    if (i + 1 < FirstpointsCopy.size()) {
+                                        polylineOptions.add(FirstpointsCopy.get(i + 1));
+                                    }
+                                    googleMap.addPolyline(polylineOptions); // 추가된 좌표를 포함한 Polyline을 지도에 표시합니다.
+                                    // 추가된 좌표를 제거하여 중복 사용을 방지합니다.
+                                    if (i + 1 < FirstpointsCopy.size()) {
+                                        polylineOptions.getPoints().remove(FirstpointsCopy.get(i + 1));
+                                    }
+                                    polylineOptions.getPoints().remove(FirstpointsCopy.get(i));
+                                }
+
+                            }
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parentView) {
+                            // 아무 항목도 선택되지 않았을 때 실행되는 코드
+                        }
+                    });
+
+                }
+                else if(selectedFloorStart == selectedFloorDestination)
+                {
+
+                    //출발지 마커
+                    List<List<String>> SaveMarkerLocation = new ArrayList<>();
+                    List<Double> MarkerLocation = new ArrayList<>();
+                    SaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedStartLocation);
+
+                    for (List<String> innerList : SaveMarkerLocation) {
+                        for (String str : innerList) {
+                            // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                            String[] split = str.split(",");
+                            for (String s : split) {
+                                MarkerLocation.add(Double.parseDouble(s.trim()));
+                            }
+                        }
+                    }
+
+
+                    if(!SaveMarkerLocation.isEmpty())
+                    {
+                        Double lat = MarkerLocation.get(1); Double lon = MarkerLocation.get(0);
+                        LatLng markerPosition = new LatLng(lat,lon);
+
+                        MarkerOptions StartMarkerOptions = new MarkerOptions();
+                        StartMarkerOptions.position(markerPosition);
+                        StartMarkerOptions.title(selectedStartLocation);
+                        StartMarkerOptions.icon(icon2);
+                        // DestinationMarkerOptions.position(markerPosition);
+                        Marker marker = googleMap.addMarker(StartMarkerOptions);
+
+                    }
+
+                    List<List<String>> DestinationSaveMarkerLocation = new ArrayList<>();
+                    List<Double> DestinationMarkerLocation = new ArrayList<>();
+                    DestinationSaveMarkerLocation = MarkerFromCSV(PdrActivity.this,selectedDestinationLocation);
+
+                    for (List<String> innerList : DestinationSaveMarkerLocation) {
+                        for (String str : innerList) {
+                            // 쉼표를 제거하고 공백을 없앤 후 더블로 변환합니다.
+                            String[] split = str.split(",");
+                            for (String s : split) {
+                                DestinationMarkerLocation.add(Double.parseDouble(s.trim()));
+                            }
+                        }
+                    }
+
+
+                    if(!DestinationMarkerLocation.isEmpty())
+                    {
+                        Double lat = DestinationMarkerLocation.get(1); Double lon = DestinationMarkerLocation.get(0);
+                        LatLng markerPosition = new LatLng(lat,lon);
+
+                        MarkerOptions StartMarkerOptions = new MarkerOptions();
+                        StartMarkerOptions.position(markerPosition);
+                        StartMarkerOptions.title(selectedDestinationLocation);
+                        StartMarkerOptions.icon(icon2);
+                        // DestinationMarkerOptions.position(markerPosition);
+                        Marker marker = googleMap.addMarker(StartMarkerOptions);
+
+                    }
+
+
+                    List<String> EdgeName = dijkstra.GetEdgeName(shortestPath);
+                    Log.d("EdgeShortestPath", "EdgeName: " + EdgeName);
+
+                    List<List<String>> valuesList = retrieveValuesFromCSV(PdrActivity.this, EdgeName);
+                    Log.d("latlon", "laton: " + valuesList);
+
+                    // 새로운 리스트를 생성하여 double 값으로 변환된 좌표를 저장합니다.
+                    List<List<Double>> convertedValuesList = new ArrayList<>();
+
+// valuesList에 저장된 좌표들을 순회하면서 double 값으로 변환하여 convertedValuesList에 저장합니다.
+                    for (List<String> coordinates : valuesList) {
+                        List<Double> convertedCoordinates = new ArrayList<>();
+                        for (String coordinate : coordinates) {
+                            String[] coords = coordinate.split(","); // 좌표를 쉼표로 분리
+                            if (coords.length == 4) { // 좌표가 위도와 경도 쌍으로 구성된 경우
+                                double latitude1 = Double.parseDouble(coords[0]);
+                                double longitude1 = Double.parseDouble(coords[1]);
+                                double latitude2 = Double.parseDouble(coords[2]);
+                                double longitude2 = Double.parseDouble(coords[3]);
+
+                                // double 값으로 변환된 좌표를 리스트에 추가합니다.
+                                convertedCoordinates.add(latitude1);
+                                convertedCoordinates.add(longitude1);
+                                convertedCoordinates.add(latitude2);
+                                convertedCoordinates.add(longitude2);
+                            }
+                        }
+                        // 변환된 좌표를 리스트에 추가합니다.
+                        convertedValuesList.add(convertedCoordinates);
+                    }
+
+                    Log.d("double", "double: " + convertedValuesList);
+
+                    List<LatLng> points = new ArrayList<>();
+                    for (List<Double> coordinates : convertedValuesList) {
+                        for (int i = 0; i < coordinates.size(); i += 2) { // 각 좌표쌍마다 2씩 증가
+                            double longitude = coordinates.get(i);
+                            double latitude = coordinates.get(i + 1);
+                            points.add(new LatLng(latitude, longitude)); // 위도와 경도를 바꿔서 추가
+                        }
+                    }
+                    // 원래의 points 리스트를 복사하여 pointsCopy를 생성합니다.
+                    List<LatLng> pointsCopy = new ArrayList<>(points);
+                    Log.d("polyline","polyline: "+pointsCopy);
+
+                    PolylineOptions polylineOptions = new PolylineOptions()
+                            .width(10)
+                            .color(Color.BLUE);
+                    // pointsCopy 리스트에 저장된 좌표를 2개씩 PolylineOptions에 추가합니다.
+                    for (int i = 0; i < pointsCopy.size(); i += 2) {
+                        // 현재 좌표와 다음 좌표를 가져와서 PolylineOptions에 추가합니다.
+                        polylineOptions.add(pointsCopy.get(i));
+                        if (i + 1 < pointsCopy.size()) {
+                            polylineOptions.add(pointsCopy.get(i + 1));
+                        }
+                        googleMap.addPolyline(polylineOptions); // 추가된 좌표를 포함한 Polyline을 지도에 표시합니다.
+                        // 추가된 좌표를 제거하여 중복 사용을 방지합니다.
+                        if (i + 1 < pointsCopy.size()) {
+                            polylineOptions.getPoints().remove(pointsCopy.get(i + 1));
+                        }
+                        polylineOptions.getPoints().remove(pointsCopy.get(i));
+                    }
+
+
+                }
+            }
+        });
+
+        bt_searchOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // bt_searchoff 버튼이 클릭되었을 때 실행되는 코드를 여기에 추가합니다.
+                // marker.remove();
+                // 폴리라인 제거 예:
+                googleMap.clear();
+
+                // 기타 관련된 작업들을 초기화하는 코드를 추가합니다.
+            }
+        });
+    }
+
+    public List<List<String>> MarkerFromCSV(Context context, String SpinnerName) {
+        List<List<String>> MarkerLocation = new ArrayList<>();
+        try {
+            // CSV 파일을 읽어오기 위해 CSVReader 클래스 사용
+            List<List<String>> csvData = CSVReader.pathCSV(context, "path12345-좌표최종2.csv");
+
+            // selectedStartLocation 변수의 값과 CSV 파일의 1열 또는 2열과 비교하여 일치하는 경우 해당 행의 6번째 열 값을 추가
+            for (List<String> row : csvData) {
+                if (row.size() >= 2 && (row.get(0).equals(SpinnerName) || row.get(1).equals(SpinnerName))) {
+                    // 선택한 시작 위치와 CSV 파일의 1열 또는 2열이 일치하는 경우
+                    if (row.size() >= 6) {
+                        // 6번째 열 값이 있는 경우 해당 값을 추가
+                        MarkerLocation.add(Collections.singletonList(row.get(5)));
+                    } else {
+                        // 6번째 열 값이 없는 경우 빈 값을 추가
+                        MarkerLocation.add(Collections.singletonList(""));
+                    }
+                    // 선택한 시작 위치와 일치하는 행을 찾았으므로 더 이상 반복할 필요 없음
+                    break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // 예외 처리 로직 추가
+        }
+        return MarkerLocation;
+    }
+
+    private void showMapForFloor(int floor) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.level_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        switch (floor) {
+            case 1:
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getPosition("F1"));
+                showFeaturesForLevel(0); // 레벨에 따른 특징을 보여주는 메서드 호출
+                break;
+            case 2:
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getPosition("F2"));
+                showFeaturesForLevel(1);
+                break;
+            // 필요한 만큼 층에 대한 case를 추가할 수 있습니다.
+            case 3:
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getPosition("F3"));
+                showFeaturesForLevel(2);
+                break;
+            case 4:
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getPosition("F4"));
+                showFeaturesForLevel(3);
+                break;
+            case 5:
+                spinner.setAdapter(adapter);
+                spinner.setSelection(adapter.getPosition("F5"));
+                showFeaturesForLevel(4);
+                break;
+        }
+    }
+
+    private void readGraphDataFromCSV(Context context, UndirectedGraph graph, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        try {
+            InputStream inputStream = assetManager.open("path12345-좌표최종2.csv");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] columns = line.split(",");
+                if (columns.length >= 4) {
+                    String startNode = columns[0].trim();
+                    String endNode = columns[1].trim();
+                    String edgeName = columns[2].trim();
+                    double length = Double.parseDouble(columns[3].trim());
+
+                    if (startNode != null && endNode != null && edgeName != null) {
+                        graph.addEdge(startNode, endNode, edgeName, length);
+                    }
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<List<String>> retrieveValuesFromCSV(Context context, List<String> edgeNames) {
+        List<List<String>> valuesList = new ArrayList<>();
+        try {
+            // CSV 파일을 읽어오기 위해 CSVReader 클래스 사용
+            List<List<String>> csvData = CSVReader.pathCSV(context, "path12345-좌표최종2.csv");
+
+            // edgeNames 리스트를 순회하며 각 값과 CSV 파일의 3번째 열 값을 비교
+            for (String edgeName : edgeNames) {
+                for (List<String> row : csvData) {
+                    // CSV 파일의 3번째 열 값과 edgeName이 일치하는 경우
+                    if (row.size() >= 3 && row.get(2).equals(edgeName)) {
+                        // 이차원 리스트에 해당 행의 5번째 열 값을 추가
+                        if (row.size() >= 5) {
+                            valuesList.add(Collections.singletonList(row.get(4)));
+                        } else {
+                            // 5번째 열 값이 없는 경우 빈 값을 추가
+                            valuesList.add(Collections.singletonList(""));
+                        }
+                        break; // 일치하는 행을 찾았으므로 더 이상 반복할 필요 없음
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // 예외 처리 로직 추가
+        }
+        Log.d("위경도 추가","위경도 추가"+valuesList);
+        return valuesList;
     }
 
     private void handleLocationResult(Location location) {

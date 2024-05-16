@@ -23,7 +23,7 @@ public class DeviceAttitudeHandler implements SensorEventListener {
     private long previousTimestamp = 0;
     private float[] rotationAngleArray = new float[3];
     private boolean isPDRStarted = false; // PDR 시작 여부를 나타내는 플래그
-    private static final float ROTATION_THRESHOLD = 0.05f; // 회전 감지 임계값 설정
+    private static final float ROTATION_THRESHOLD = 0.18f; // 회전 감지 임계값 설정
     private boolean isRotationDetected = false; // 회전 감지 여부를 나타내는 플래그
 
     public DeviceAttitudeHandler(SensorManager sensorManager) {
