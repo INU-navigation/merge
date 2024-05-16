@@ -9,6 +9,8 @@ public class StepPositioningHandler {
     private static final double EARTH_RADIUS = 6371000;
     private float initialAzimuth = Float.NaN;
     private float direction;
+    private boolean isRotated1 = false;
+    private boolean isRotated2 = false;
     private float distance;
     private float previousRotationAngle = 0.0f;
 
@@ -21,9 +23,11 @@ public class StepPositioningHandler {
         Log.d("RotationAngle", "CurrentRotationAngle = " + currentRotationAngle + "previousRotationAngle = " + previousRotationAngle);
         Log.d("RotationAngle", "direction+= = " + Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))));
 
-        direction += (float) Math.toDegrees(currentRotationAngle);
+        if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 3.0) {
+            direction += (float) Math.toDegrees(currentRotationAngle);
+        }
 
-        PdrActivity.sdh.setDistanceStep(0.7f);
+        PdrActivity.sdh.setDistanceStep(0.75f);
         double angularDistance = stepSize / EARTH_RADIUS;
 
         double oldLatitude = currentLocation.getLatitude();
@@ -46,14 +50,23 @@ public class StepPositioningHandler {
         newLocation.setLongitude(newLongitude);
         distance = oldLocation.distanceTo(newLocation);
 
-        if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 5.0) {
+        if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 15.0) {
+            if (!isRotated1) {
+                setInitialAzimuth(PdrActivity.dah.getAzimuth());
+                isRotated1 = true;
+            }
             Log.d("stepSize", "stepSize = " + 0.5);
-            setInitialAzimuth(PdrActivity.dah.getAzimuth());
-            PdrActivity.sdh.setDistanceStep(0.85f);
-        } else if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 20.0) {
-            setInitialAzimuth(PdrActivity.dah.getAzimuth());
-            PdrActivity.sdh.setDistanceStep(0.05f);
+            PdrActivity.sdh.setDistanceStep(0.6f);
+        } else if (Math.abs((float) (Math.toDegrees(currentRotationAngle) - (float) Math.toDegrees(previousRotationAngle))) >= 30.0) {
+            if (!isRotated2) {
+                setInitialAzimuth(PdrActivity.dah.getAzimuth());
+                isRotated2 = true;
+            }
+            PdrActivity.sdh.setDistanceStep(0.4f);
             Log.d("stepSize", "stepSize = " + 0.01);
+        } else {
+            isRotated1 = false;
+            isRotated2 = false;
         }
 
         previousRotationAngle = currentRotationAngle;

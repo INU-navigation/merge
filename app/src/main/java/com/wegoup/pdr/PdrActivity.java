@@ -143,13 +143,11 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
         ImageButton editButton = findViewById(R.id.edit_button);
         editButton.setOnClickListener(v -> {
             if (googleMap != null) {
-                if (isInsidePlace.building7(markerPosition)) {
                 if (marker != null && userPath != null) {
                     marker.remove();
                     userPath.remove(); userPath = null;
                     stopPDR();
                 }
-
                 if (lastKnownLatLng != null) {
                 addMarker(lastKnownLatLng.latitude, lastKnownLatLng.longitude);
             } else {
@@ -159,7 +157,6 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                 marker.setIcon(BitmapDescriptorFactory.defaultMarker());
                 Toast.makeText(PdrActivity.this, "마커를 꾹 눌러 움직여주세요", Toast.LENGTH_LONG).show();
                 marker.setDraggable(true);
-                }
             }
         });
 
@@ -483,13 +480,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
             sdh.setStepListener(mStepDetectionListener);
             sdh.start();
 
-            if (insideBuilding) {
-                drawUserPath(location, isInsidePlace.building7(location));
-
-            } else {
-                // 건물 외부인 경우 사용자 경로를 그립니다.
-                drawUserPath(location, isInsidePlace.building7(location));
-            }
+            drawUserPath(location, isInsidePlace.building7(location));
         }
     }
 
@@ -534,7 +525,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
     // 사용자 경로를 그리는 함수
     public void drawUserPath(LatLng location, boolean insideBuilding) {
         if (googleMap != null) {
-            if (insideBuilding) {
+            /*if (insideBuilding) {
                 int curfloor = spinner.getSelectedItemPosition();
                 if (floorPaths == null) {
                     // 건물 내 처음 사용자 경로를 그릴 때
@@ -554,7 +545,7 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                     lastKnownLatLng = points.get(points.size() - 1);
                 }
                 floorPaths.add(curfloor, floorPath);
-            } else {
+            } else {*/
                 if (userPath == null) {
                     // 처음 사용자 경로를 그릴 때
                     PolylineOptions options = new PolylineOptions()
@@ -575,7 +566,6 @@ public class PdrActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             }
         }
-    }
 
     // 사용자가 층을 선택할 때 해당 층에서의 이동 경로를 표시하는 메서드
     private void showFloorPath(int floorIndex) {

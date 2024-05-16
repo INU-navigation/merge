@@ -15,11 +15,12 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
     private int step = 0;
     private float[] filteredValues = {0.0f, 0.0f}; // x, y 축의 지수 이동 평균 필터링된 값
     private static final float ALPHA = 0.2f; // 지수 이동 평균 필터의 가중치
-    private static final float THRESHOLD_LOWER = 0.1f; // 초기 임계값의 하한
+    private static final float THRESHOLD_LOWERX = 0.05f; // 초기 임계값의 하한
+    private static final float THRESHOLD_LOWERY = 0.5f; // 초기 임계값의 하한
     private static final float THRESHOLD_UPPER = 1.0f; // 초기 임계값의 상한
-    private float initialThresholdX = 0.13f; // 초기 임계값
+    private float initialThresholdX = 0.15f; // 초기 임계값
     private float initialThresholdY = 1.0f; // 초기 임계값
-    public float distanceStep = 0.7f;
+    public float distanceStep = 0.75f;
 
     public void setDistanceStep(float stepSize){
         distanceStep = stepSize;
@@ -56,6 +57,7 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
             // x 축과 y 축에 대해 각각 지수 이동 평균 필터링 적용
             filteredValues[0] = applyExponentialMovingAverageFilter(x, filteredValues[0]);
             filteredValues[1] = applyExponentialMovingAverageFilter(y, filteredValues[1]);
+
 
             // 걸음 감지를 위한 임계값 동적 조절
             adjustThreshold();
@@ -103,8 +105,8 @@ public class StepDetectionHandler extends Activity implements SensorEventListene
             distanceStep = Math.min(distanceStep + 0.2f, THRESHOLD_UPPER); // 보폭 길이도 조절
         } else {
             // 그 외의 경우, 임계값을 초기 값으로 복원합니다.
-            initialThresholdX = THRESHOLD_LOWER;
-            initialThresholdY = THRESHOLD_LOWER;
+            initialThresholdX = THRESHOLD_LOWERX;
+            initialThresholdY = THRESHOLD_LOWERY;
         }
     }
 
