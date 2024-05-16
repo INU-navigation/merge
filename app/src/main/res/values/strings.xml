@@ -1,0 +1,309 @@
+<resources>
+    <string name="app_name">indoorMap</string>
+    <string name="select_level">층 선택</string>
+    <string-array name="level_array">
+        <item>F1</item>
+        <item>F2</item>
+        <item>F3</item>
+        <item>F4</item>
+        <item>F5</item>
+        <item>X</item>
+    </string-array>
+    <string-array name="room_start">
+        <item>출발지 선택</item>
+        <item>994A-A동정문</item>
+        <item>994D-B동정문</item>
+        <item>994B-A동후문</item>
+        <item>994C-B동후문</item>
+        <item>101-디지털실험실</item>
+        <item>102-기초정보공학실험실</item>
+        <item>103-단과대학생회실</item>
+        <item>104-강의실(중)-1</item>
+        <item>105-정보시스템실험실</item>
+        <item>106-PC검색실</item>
+        <item>107-정보통신실험실</item>
+        <item>108-학과학생회실(정보통신공학과)</item>
+        <item>109-경비실</item>
+        <item>111-컴퓨터실험실-1</item>
+        <item>112-여학생휴게실</item>
+        <item>113~116-탈의실 및 샤워실</item>
+        <item>U101-화장실(남)</item>
+        <item>U102-화장실(여)</item>
+        <item>201-지능형 신호 및 정보 시스템 연구실</item>
+        <item>202-분산네트워크연구실</item>
+        <item>203-무선정보연구실</item>
+        <item>204-임베디드 인공지능 연구실</item>
+        <item>205-정보처리실험실</item>
+        <item>206-정보공학실험실</item>
+        <item>209-학과사무실(정보통신공학과)</item>
+        <item>210-실험준비실-2</item>
+        <item>211-컴퓨터실험실-2</item>
+        <item>212-실험준비실-1</item>
+        <item>213-임베디드영상신호처리실험실</item>
+        <item>214-연구용실험실</item>
+        <item>215-전파공학전파환경연구실</item>
+        <item>216-통신망및보안연구실</item>
+        <item>217-정보보안연구실</item>
+        <item>218-교수연구실(정보통신-김영필)</item>
+        <item>219-교수연구실(정보통신-이은규)</item>
+        <item>220-교수연구실(정보통신-강현철)</item>
+        <item>221-교수연구실(정보통신-노송)</item>
+        <item>222-교수연구실(정보통신-우요섭)</item>
+        <item>223-교수연구실(정보통신-이종길)</item>
+        <item>224-교수연구실(정보통신-이기영)</item>
+        <item>225-교수연구실(정보통신-강승택)</item>
+        <item>226-교수연구실(정보통신-박정훈)</item>
+        <item>227-교수연구실(임베디드시스템-전광길)</item>
+        <item>228-이동통신시스템</item>
+        <item>229-영상연구실</item>
+        <item>U201-화장실(남)</item>
+        <item>U202-화장실(여)</item>
+        <item>301-지능로봇시스템실험실</item>
+        <item>302-캡스톤디자인실험실</item>
+        <item>303-학과학생회실-2(임베디드시스템)</item>
+        <item>304-강의실(대)-계단식</item>
+        <item>305-프로그래밍실습실</item>
+        <item>306-임베디드SW실험실</item>
+        <item>309-학과사무실(임베디드시스템)</item>
+        <item>310-실험준비실</item>
+        <item>311-대학원강의실</item>
+        <item>312-임베디드네트워크시스템 설계연구실</item>
+        <item>313-강의실(중)</item>
+        <item>314-강의실(소)-1</item>
+        <item>315-ABEEK자료실</item>
+        <item>316-임베디드HW실습실</item>
+        <item>317-창의설계실험실</item>
+        <item>318-임베디드SW설계실험실</item>
+        <item>319-모바일앱실험실</item>
+        <item>320-교수연구실(박기석)</item>
+        <item>321-교학실(정보기술대 교학실)</item>
+        <item>322-학장실(정보기술대 교학실)</item>
+        <item>323-교수연구실(임베디드시스템-전경구)</item>
+        <item>324-교수연구실(임베디드시스템-강석훈)</item>
+        <item>325-교수연구실(임베디드시스템-이영섭)</item>
+        <item>326-교수연구실(임베디드시스템)</item>
+        <item>327-교수연구실(임베디드시스템-최병조)</item>
+        <item>328-교수연구실(임베디드시스템-강석훈)</item>
+        <item>329-임베디드시스템구조실험실</item>
+        <item>330-무선통신실험실</item>
+        <item>U301-화장실(남)</item>
+        <item>U302-화장실(여)</item>
+        <item>401-모바일컴퓨팅연구실</item>
+        <item>402-무선정보네트워크연구실</item>
+        <item>403-세미나실</item>
+        <item>404-기자재실</item>
+        <item>405-정보기술대학원 학생회실</item>
+        <item>406-강의실(소)-2</item>
+        <item>407-강의실(중)-3</item>
+        <item>408-컴퓨터실습실-1</item>
+        <item>409-실습준비실</item>
+        <item>410-학부사무실(컴퓨터공학부)</item>
+        <item>413-멀티미디어가상현실연구실</item>
+        <item>414-인터넷소프트웨어연구실</item>
+        <item>415-컴퓨터실습실-2</item>
+        <item>416-세미나실(대)</item>
+        <item>417-강의실(소)-3</item>
+        <item>418-첨단SW연구센터</item>
+        <item>419-컴퓨터공학부 학생회실(주)</item>
+        <item>420-프로젝트실-1</item>
+        <item>421-엔터테인먼트 컴퓨팅연구실</item>
+        <item>422-그래픽스 AI 연구실</item>
+        <item>423-분산시스템연구실</item>
+        <item>424-생물정보학연구실</item>
+        <item>425-교수연구실(컴퓨터공학부-박종승)</item>
+        <item>426-교수연구실(컴퓨터공학부-채진석)</item>
+        <item>427-교수연구실(컴퓨터공학부-성미영)</item>
+        <item>428-교수연구실(컴퓨터공학부-이승수)</item>
+        <item>429-교수연구실(컴퓨터공학부-민병준)</item>
+        <item>430-교수연구실(컴퓨터공학부-이장호)</item>
+        <item>431-교수연구실(컴퓨터공학부-백형부)</item>
+        <item>432-교수연구실(컴퓨터공학부-김지범)</item>
+        <item>433-교수연구실(컴퓨터공학부-홍윤식)</item>
+        <item>434-교수연구실(컴퓨터공학부-최승식)</item>
+        <item>435-데이터지능연구실</item>
+        <item>436-뉴로모픽 컴퓨팅 시스템 연구실</item>
+        <item>U401-화장실(남)</item>
+        <item>U402-화장실(여)</item>
+        <item>501-컴퓨터실습실-3</item>
+        <item>502-HW실습실</item>
+        <item>503(A,B)-연구용실험실</item>
+        <item>504-강의실(중)-1</item>
+        <item>505-강의실(중)-2</item>
+        <item>506-IMPRESS연구실</item>
+        <item>509-교수연구실(정보통신-이병주)</item>
+        <item>509A-강사대기실</item>
+        <item>510-퀀텀라이파이연구실</item>
+        <item>510A-퀀텀라이파이연구실</item>
+        <item>511-컴퓨터실험실-4</item>
+        <item>512-서버실</item>
+        <item>513-컴퓨터공학부 학생회실(야)</item>
+        <item>514-프로젝트실-2</item>
+        <item>515-햅틱공학연구실</item>
+        <item>515A-햅틱공학연구실</item>
+        <item>516-실시간 인공지능 연구실</item>
+        <item>517-네트워크 및 모바일 시스템 연구실</item>
+        <item>517A-네트워크 및 모바일 시스템 연구실</item>
+        <item>518-교수연구실(임베디드시스템-강우철)</item>
+        <item>519-교수연구실(정보통신-조경훈)</item>
+        <item>520-교수연구실(정보통신-전현채)</item>
+        <item>521-교수연구실(컴퓨터공학부-구민석)</item>
+        <item>522-교수연구실(컴퓨터공학부-이면섭)</item>
+        <item>523-교수연구실(컴퓨터공학부-안재균)</item>
+        <item>524-교수연구실(컴퓨터공학부-최대진)</item>
+        <item>525-교수연구실(컴퓨터공학부-신유현)</item>
+        <item>526-교수연구실(컴퓨터공학부-김우일)</item>
+        <item>527-교수연구실(컴퓨터공학부-박문주)</item>
+        <item>528-시스템소프트웨어연구실</item>
+        <item>U501-화장실(남)</item>
+        <item>U502-화장실(여)</item>
+    </string-array>
+    <string-array name="room_destination">
+        <item>도착지 선택</item>
+        <item>994A-A동정문</item>
+        <item>994D-B동정문</item>
+        <item>994B-A동후문</item>
+        <item>994C-B동후문</item>
+        <item>101-디지털실험실</item>
+        <item>102-기초정보공학실험실</item>
+        <item>103-단과대학생회실</item>
+        <item>104-강의실(중)-1</item>
+        <item>105-정보시스템실험실</item>
+        <item>106-PC검색실</item>
+        <item>107-정보통신실험실</item>
+        <item>108-학과학생회실(정보통신공학과)</item>
+        <item>109-경비실</item>
+        <item>111-컴퓨터실험실-1</item>
+        <item>112-여학생휴게실</item>
+        <item>113~116-탈의실 및 샤워실</item>
+        <item>U101-화장실(남)</item>
+        <item>U102-화장실(여)</item>
+        <item>201-지능형 신호 및 정보 시스템 연구실</item>
+        <item>202-분산네트워크연구실</item>
+        <item>203-무선정보연구실</item>
+        <item>204-임베디드 인공지능 연구실</item>
+        <item>205-정보처리실험실</item>
+        <item>206-정보공학실험실</item>
+        <item>209-학과사무실(정보통신공학과)</item>
+        <item>210-실험준비실-2</item>
+        <item>211-컴퓨터실험실-2</item>
+        <item>212-실험준비실-1</item>
+        <item>213-임베디드영상신호처리실험실</item>
+        <item>214-연구용실험실</item>
+        <item>215-전파공학전파환경연구실</item>
+        <item>216-통신망및보안연구실</item>
+        <item>217-정보보안연구실</item>
+        <item>218-교수연구실(정보통신-김영필)</item>
+        <item>219-교수연구실(정보통신-이은규)</item>
+        <item>220-교수연구실(정보통신-강현철)</item>
+        <item>221-교수연구실(정보통신-노송)</item>
+        <item>222-교수연구실(정보통신-우요섭)</item>
+        <item>223-교수연구실(정보통신-이종길)</item>
+        <item>224-교수연구실(정보통신-이기영)</item>
+        <item>225-교수연구실(정보통신-강승택)</item>
+        <item>226-교수연구실(정보통신-박정훈)</item>
+        <item>227-교수연구실(임베디드시스템-전광길)</item>
+        <item>228-이동통신시스템</item>
+        <item>229-영상연구실</item>
+        <item>U201-화장실(남)</item>
+        <item>U202-화장실(여)</item>
+        <item>301-지능로봇시스템실험실</item>
+        <item>302-캡스톤디자인실험실</item>
+        <item>303-학과학생회실-2(임베디드시스템)</item>
+        <item>304-강의실(대)-계단식</item>
+        <item>305-프로그래밍실습실</item>
+        <item>306-임베디드SW실험실</item>
+        <item>309-학과사무실(임베디드시스템)</item>
+        <item>310-실험준비실</item>
+        <item>311-대학원강의실</item>
+        <item>312-임베디드네트워크시스템 설계연구실</item>
+        <item>313-강의실(중)</item>
+        <item>314-강의실(소)-1</item>
+        <item>315-ABEEK자료실</item>
+        <item>316-임베디드HW실습실</item>
+        <item>317-창의설계실험실</item>
+        <item>318-임베디드SW설계실험실</item>
+        <item>319-모바일앱실험실</item>
+        <item>320-교수연구실(박기석)</item>
+        <item>321-교학실(정보기술대 교학실)</item>
+        <item>322-학장실(정보기술대 교학실)</item>
+        <item>323-교수연구실(임베디드시스템-전경구)</item>
+        <item>324-교수연구실(임베디드시스템-강석훈)</item>
+        <item>325-교수연구실(임베디드시스템-이영섭)</item>
+        <item>326-교수연구실(임베디드시스템)</item>
+        <item>327-교수연구실(임베디드시스템-최병조)</item>
+        <item>328-교수연구실(임베디드시스템-강석훈)</item>
+        <item>329-임베디드시스템구조실험실</item>
+        <item>330-무선통신실험실</item>
+        <item>U301-화장실(남)</item>
+        <item>U302-화장실(여)</item>
+        <item>401-모바일컴퓨팅연구실</item>
+        <item>402-무선정보네트워크연구실</item>
+        <item>403-세미나실</item>
+        <item>404-기자재실</item>
+        <item>405-정보기술대학원 학생회실</item>
+        <item>406-강의실(소)-2</item>
+        <item>407-강의실(중)-3</item>
+        <item>408-컴퓨터실습실-1</item>
+        <item>409-실습준비실</item>
+        <item>410-학부사무실(컴퓨터공학부)</item>
+        <item>413-멀티미디어가상현실연구실</item>
+        <item>414-인터넷소프트웨어연구실</item>
+        <item>415-컴퓨터실습실-2</item>
+        <item>416-세미나실(대)</item>
+        <item>417-강의실(소)-3</item>
+        <item>418-첨단SW연구센터</item>
+        <item>419-컴퓨터공학부 학생회실(주)</item>
+        <item>420-프로젝트실-1</item>
+        <item>421-엔터테인먼트 컴퓨팅연구실</item>
+        <item>422-그래픽스 AI 연구실</item>
+        <item>423-분산시스템연구실</item>
+        <item>424-생물정보학연구실</item>
+        <item>425-교수연구실(컴퓨터공학부-박종승)</item>
+        <item>426-교수연구실(컴퓨터공학부-채진석)</item>
+        <item>427-교수연구실(컴퓨터공학부-성미영)</item>
+        <item>428-교수연구실(컴퓨터공학부-이승수)</item>
+        <item>429-교수연구실(컴퓨터공학부-민병준)</item>
+        <item>430-교수연구실(컴퓨터공학부-이장호)</item>
+        <item>431-교수연구실(컴퓨터공학부-백형부)</item>
+        <item>432-교수연구실(컴퓨터공학부-김지범)</item>
+        <item>433-교수연구실(컴퓨터공학부-홍윤식)</item>
+        <item>434-교수연구실(컴퓨터공학부-최승식)</item>
+        <item>435-데이터지능연구실</item>
+        <item>436-뉴로모픽 컴퓨팅 시스템 연구실</item>
+        <item>U401-화장실(남)</item>
+        <item>U402-화장실(여)</item>
+        <item>501-컴퓨터실습실-3</item>
+        <item>502-HW실습실</item>
+        <item>503(A,B)-연구용실험실</item>
+        <item>504-강의실(중)-1</item>
+        <item>505-강의실(중)-2</item>
+        <item>506-IMPRESS연구실</item>
+        <item>509-교수연구실(정보통신-이병주)</item>
+        <item>509A-강사대기실</item>
+        <item>510-퀀텀라이파이연구실</item>
+        <item>510A-퀀텀라이파이연구실</item>
+        <item>511-컴퓨터실험실-4</item>
+        <item>512-서버실</item>
+        <item>513-컴퓨터공학부 학생회실(야)</item>
+        <item>514-프로젝트실-2</item>
+        <item>515-햅틱공학연구실</item>
+        <item>515A-햅틱공학연구실</item>
+        <item>516-실시간 인공지능 연구실</item>
+        <item>517-네트워크 및 모바일 시스템 연구실</item>
+        <item>517A-네트워크 및 모바일 시스템 연구실</item>
+        <item>518-교수연구실(임베디드시스템-강우철)</item>
+        <item>519-교수연구실(정보통신-조경훈)</item>
+        <item>520-교수연구실(정보통신-전현채)</item>
+        <item>521-교수연구실(컴퓨터공학부-구민석)</item>
+        <item>522-교수연구실(컴퓨터공학부-이면섭)</item>
+        <item>523-교수연구실(컴퓨터공학부-안재균)</item>
+        <item>524-교수연구실(컴퓨터공학부-최대진)</item>
+        <item>525-교수연구실(컴퓨터공학부-신유현)</item>
+        <item>526-교수연구실(컴퓨터공학부-김우일)</item>
+        <item>527-교수연구실(컴퓨터공학부-박문주)</item>
+        <item>528-시스템소프트웨어연구실</item>
+        <item>U501-화장실(남)</item>
+        <item>U502-화장실(여)</item>
+    </string-array>
+    <string name="title_activity_pdr">PdrActivity</string>
+</resources>
